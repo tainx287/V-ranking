@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Search, MapPin, Hand, Send, DoorOpen, MessageSquareText } from 'lucide-react';
 
 const ROOMS = [
@@ -59,7 +59,7 @@ export default function HelpRequestModal({ isOpen, onClose, onSubmit, students, 
     
     let finalNote = PREDEFINED_NOTES.find(n => n.id === selectedNoteType)?.label || '';
     if (selectedNoteType === 'other' || customNote.trim().length > 0) {
-      finalNote = selectedNoteType === 'other' ? customNote : \ - \;
+      finalNote = selectedNoteType === 'other' ? customNote : `${finalNote} - ${customNote}`;
     }
     
     // Fake network delay for better UX

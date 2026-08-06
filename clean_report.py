@@ -111,7 +111,7 @@ def parse_raw_line(line):
     if points_match:
         cleaned_line = cleaned_line.replace(points_match.group(0), '')
         
-    parts = [p.strip() for p in re.split(r'[\t\-–—]', cleaned_line) if p.strip()]
+    parts = [p.strip() for p in re.split(r'[\t\-–—:,]', cleaned_line) if p.strip()]
     
     name_candidate = ""
     # Heuristic 1: Find a clean-looking part that is long enough and contains no keywords
