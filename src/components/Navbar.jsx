@@ -41,7 +41,7 @@ export default function Navbar({
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="font-black text-xl tracking-tight text-slate-900 dark:text-white">
+              <h1 className="font-black text-lg sm:text-xl tracking-tight text-slate-900 dark:text-white">
                 LabScore <span className="text-amber-500">LIVE</span>
               </h1>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-200">
@@ -83,30 +83,11 @@ export default function Navbar({
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-700 transition-all placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
-            {/* Cohort pills */}
-            <div className="flex items-center gap-1">
-              {[['ALL', 'Tất cả'], ['Khóa 3', 'K3'], ['Khóa 4', 'K4']].map(([val, label]) => (
-                <button
-                  key={val}
-                  onClick={() => setSearchCohort(val)}
-                  className={`px-2 py-1.5 rounded-lg text-[10px] font-black transition-colors ${
-                    searchCohort === val
-                      ? val === 'ALL'
-                        ? 'bg-slate-800 dark:bg-slate-600 text-white'
-                        : val === 'Khóa 3'
-                        ? 'bg-amber-500 text-slate-950'
-                        : 'bg-indigo-500 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Clock */}
-          <div className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-mono text-xs font-black shadow-inner">
+
+          {/* Clock (Hidden on Mobile) */}
+          <div className="hidden sm:flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-mono text-xs font-black shadow-inner">
             <Clock className="w-4 h-4 text-slate-400" />
             <span>{timeStr}</span>
           </div>
@@ -133,8 +114,34 @@ export default function Navbar({
                 
                 <div className="absolute right-0 mt-3 w-72 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl p-4 space-y-4 z-50 animate-fadeIn text-slate-900 dark:text-slate-100">
                   
-                  <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                    <h4 className="font-extrabold text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider">Cài Đặt & Bảng Điều Khiển</h4>
+                  <div className="border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center justify-between">
+                    <h4 className="font-extrabold text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider">Bảng Điều Khiển</h4>
+                  </div>
+
+                  {/* Mobile-only Controls: Search & Session */}
+                  <div className="sm:hidden space-y-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <div className="relative w-full">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                      <input
+                        type="text"
+                        placeholder="Tìm học viên..."
+                        value={searchStudentQuery}
+                        onChange={(e) => setSearchStudentQuery(e.target.value)}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-500"
+                      />
+                    </div>
+                    <div className="md:hidden flex items-center bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-200">
+                      <Calendar className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
+                      <select
+                        value={selectedSession}
+                        onChange={(e) => setSelectedSession(e.target.value)}
+                        className="bg-transparent text-slate-800 dark:text-slate-100 font-extrabold text-xs w-full focus:outline-none cursor-pointer"
+                      >
+                        {sessions.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   {/* Mode switcher tabs */}
@@ -169,7 +176,14 @@ export default function Navbar({
                     </button>
 
                     <button
-                      onClick={() => { setActiveTab('data'); setMenuOpen(false); }}
+                      onClick={() => {
+                        if (!currentCoach) {
+                          onOpenAuthModal();
+                        } else {
+                          setActiveTab('data');
+                        }
+                        setMenuOpen(false);
+                      }}
                       className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
                         activeTab === 'data' ? 'bg-slate-900 dark:bg-slate-700 text-white shadow-md' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                       }`}

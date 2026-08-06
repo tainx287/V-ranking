@@ -26,7 +26,7 @@ export default function CoachAuthModal({
       onLoginSuccess({ ...coach, room: roomInput || 'Chưa chọn phòng' });
       onClose();
     } else {
-      setErrorMsg('Mã PIN không đúng (Mặc định demo: 1234)');
+      setErrorMsg('Mã PIN không đúng.');
     }
   };
 
@@ -70,7 +70,7 @@ export default function CoachAuthModal({
             <label className="text-xs font-bold text-slate-300 block">Mã PIN xác thực:</label>
             <input
               type="password"
-              placeholder="Nhập PIN (Mặc định: 1234)"
+              placeholder="Nhập mã PIN..."
               value={pinInput}
               onChange={(e) => {
                 setPinInput(e.target.value);

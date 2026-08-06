@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, PlusCircle, RotateCcw, CheckCircle2, UserPlus, Sparkles, Zap, Flame, ShieldAlert, Award, Copy, Check, Trash2, Users } from 'lucide-react';
+import { Search, PlusCircle, RotateCcw, CheckCircle2, UserPlus, Sparkles, Zap, Flame, ShieldAlert, Award, Copy, Check, Trash2, Users, Hand } from 'lucide-react';
 import { playCoinSound, playFanfareSound } from '../utils/audio';
 import confetti from 'canvas-confetti';
 
@@ -12,9 +12,11 @@ export default function CoachQuickControl({
   soundEnabled,
   currentCoach,
   claimRequests,
+  helpRequests = [],
   onApproveClaimRequest,
   onRejectClaimRequest,
   onClearAllPendingClaims,
+  onResolveHelpRequest,
   onAddStudent
 }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,6 +58,14 @@ export default function CoachQuickControl({
 
   // Filter pending claims for selected session
   const pendingClaims = claimRequests.filter(c => c.session_id === selectedSession && c.status === 'pending');
+  
+  const [showAllRoomsHelp, setShowAllRoomsHelp] = useState(false);
+  const activeHelpRequests = helpRequests.filter(r => {
+    if (r.session_id !== selectedSession) return false;
+    if (showAllRoomsHelp) return true;
+    if (!currentCoach?.room || currentCoach.room === 'Chưa chọn phòng') return true;
+    return r.room === currentCoach.room;
+  });
 
   // Quick Award handler (Single student)
   const handleAwardPoints = (student, pts, defaultReason, cat = 'INDIVIDUAL') => {
@@ -288,6 +298,79 @@ export default function CoachQuickControl({
         </button>
       </div>
 
+      {/* HELP REQUESTS SECTION */}
+      {activeHelpRequests.length > 0 && (
+        <div className="bg-rose-500/10 dark:bg-rose-900/20 p-5 rounded-2xl border border-rose-500/30 shadow-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Hand className="w-5 h-5 text-rose-500 animate-pulse" />
+              <h3 className="font-extrabold text-sm text-rose-700 dark:text-rose-400">
+                Học Viên Đang Cần Hỗ Trợ ({activeHelpRequests.length})
+              </h3>
+            </div>
+            
+            {/* Toggle Show All Rooms */}
+            {currentCoach?.room && currentCoach.room !== 'Chưa chọn phòng' && (
+              <button 
+                onClick={() => setShowAllRoomsHelp(!showAllRoomsHelp)}
+                className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors ${
+                  showAllRoomsHelp 
+                    ? 'bg-rose-100 border-rose-300 text-rose-700 dark:bg-rose-900/50 dark:border-rose-500/50 dark:text-rose-300' 
+                    : 'bg-white dark:bg-slate-800 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 opacity-70 hover:opacity-100'
+                }`}
+              >
+                {showAllRoomsHelp ? 'Tất cả các phòng' : `Chỉ phòng: ${currentCoach.room}`}
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {activeHelpRequests.map((req) => (
+              <div key={req.id} className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-800 flex items-center justify-between shadow-sm relative overflow-hidden">
+                {/* Visual indicator for different rooms when viewing all */}
+                {showAllRoomsHelp && req.room !== currentCoach?.room && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400/50 dark:bg-amber-500/50"></div>
+                )}
+                
+                <div className="space-y-1.5 pl-1 flex-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold text-slate-900 dark:text-white text-sm">{req.student_name}</span>
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono">
+                      {req.student_id}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-start gap-1.5 mt-1">
+                    <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
+                    <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      {req.room} <span className="text-slate-400 font-normal">|</span> <span className="text-rose-600 dark:text-rose-400">{req.location}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-1.5">
+                    <MessageSquareText className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+                      {req.note}
+                    </p>
+                  </div>
+                  
+                  <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800/50 mt-1">{req.timestamp}</p>
+                </div>
+
+                <div className="flex flex-col items-center justify-center space-y-1.5 ml-3 shrink-0">
+                  <button
+                    onClick={() => onResolveHelpRequest(req.id)}
+                    className="px-4 py-2.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-black text-xs shadow-md shadow-rose-500/20 transition-all active:scale-95"
+                  >
+                    Đã Xong
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* PENDING CLAIMS SECTION */}
       {pendingClaims.length > 0 && (
         <div className="bg-slate-900/90 p-5 rounded-2xl border border-amber-500/50 shadow-2xl space-y-3">
@@ -374,7 +457,7 @@ export default function CoachQuickControl({
                 />
               </div>
 
-              <div className="space-y-2 flex-1 overflow-y-auto max-h-[440px] pr-1">
+              <div className="space-y-2 flex-1 overflow-y-auto max-h-[250px] md:max-h-[440px] pr-1">
             {filteredStudents.length === 0 ? (
               <div className="text-center space-y-4 py-4">
                 <p className="text-xs text-slate-500">Không tìm thấy học viên khớp từ khóa.</p>
@@ -618,29 +701,29 @@ export default function CoachQuickControl({
                 <div className="space-y-3">
                   <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block">Nút Cộng Điểm Cá Nhân (1-Click):</label>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     <button
                       onClick={() => handleAwardPoints(selectedStudent, 1, 'Phát biểu ý kiến tích cực', 'INDIVIDUAL')}
-                      className="p-3.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-extrabold text-xs flex flex-col items-center justify-center space-y-1 shadow-sm transition-all hover:scale-105 active:scale-95"
+                      className="p-2 sm:p-3.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-extrabold text-xs flex flex-col items-center justify-center space-y-1 shadow-sm transition-all hover:scale-105 active:scale-95 text-center"
                     >
-                      <span className="text-base font-black">✋ +1 ĐIỂM</span>
-                      <span className="text-[10px] text-amber-800 dark:text-amber-200/80 font-bold">👤 Phát biểu cá nhân</span>
+                      <span className="text-sm sm:text-base font-black">✋ +1</span>
+                      <span className="hidden sm:block text-[10px] text-amber-800 dark:text-amber-200/80 font-bold leading-tight">Cá nhân</span>
                     </button>
 
                     <button
                       onClick={() => handleAwardPoints(selectedStudent, 3, 'Demo bài tập / Code chạy xuất sắc', 'INDIVIDUAL')}
-                      className="p-3.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/40 text-indigo-900 dark:text-indigo-300 font-extrabold text-xs flex flex-col items-center justify-center space-y-1 shadow-sm transition-all hover:scale-105 active:scale-95"
+                      className="p-2 sm:p-3.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/40 text-indigo-900 dark:text-indigo-300 font-extrabold text-xs flex flex-col items-center justify-center space-y-1 shadow-sm transition-all hover:scale-105 active:scale-95 text-center"
                     >
-                      <span className="text-base font-black">🚀 +3 ĐIỂM</span>
-                      <span className="text-[10px] text-indigo-800 dark:text-indigo-200/80 font-bold">🚀 Demo Lab cá nhân</span>
+                      <span className="text-sm sm:text-base font-black">🚀 +3</span>
+                      <span className="hidden sm:block text-[10px] text-indigo-800 dark:text-indigo-200/80 font-bold leading-tight">Demo Lab</span>
                     </button>
 
                     <button
                       onClick={() => handleAwardPoints(selectedStudent, 2, 'Hỗ trợ các nhóm bạn giải bài Lab', 'SUPPORT')}
-                      className="p-3.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-900 dark:text-emerald-300 font-extrabold text-xs flex flex-col items-center justify-center space-y-1 shadow-sm transition-all hover:scale-105 active:scale-95"
+                      className="p-2 sm:p-3.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-900 dark:text-emerald-300 font-extrabold text-xs flex flex-col items-center justify-center space-y-1 shadow-sm transition-all hover:scale-105 active:scale-95 text-center"
                     >
-                      <span className="text-base font-black">🦸 +2 ĐIỂM</span>
-                      <span className="text-[10px] text-emerald-800 dark:text-emerald-200/80 font-bold">🦸 Hỗ trợ đồng đội</span>
+                      <span className="text-sm sm:text-base font-black">🦸 +2</span>
+                      <span className="hidden sm:block text-[10px] text-emerald-800 dark:text-emerald-200/80 font-bold leading-tight">Cứu team</span>
                     </button>
                   </div>
                 </div>

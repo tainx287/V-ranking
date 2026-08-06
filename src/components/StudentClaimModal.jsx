@@ -160,7 +160,7 @@ export default function StudentClaimModal({
                 ))}
               </select>
               <p className="text-[10px] text-slate-500 mt-1">
-                🔍 Không thấy tên mình? Hãy <span className="text-amber-400 font-bold">liên hệ Lab Coach gần nhất</span> để được bổ sung vào hệ thống.
+                Tên hiển thị bao gồm [Tên Học Viên] - [Khóa]
               </p>
             </div>
 

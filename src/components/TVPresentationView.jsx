@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Trophy, Medal, Award, Flame, Zap, Shield, Users, Sparkles, TrendingUp, Clock, Search, Send, User, Filter, List, Activity, School, Crown, ChevronUp, ChevronDown, Minus } from 'lucide-react';
+import { Trophy, Medal, Award, Flame, Zap, Shield, Users, Sparkles, TrendingUp, Clock, Search, Send, User, Filter, List, Activity, School, Crown, ChevronUp, ChevronDown, Minus, Hand } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
+import coachesList from '../data/coachesData.json';
 
 // Helper to capitalize initials of student names & trim spaces
 const normalizeName = (name) => {
@@ -21,7 +22,9 @@ export default function TVPresentationView({
   sessions,
   searchStudentQuery,
   searchCohort,
-  onOpenClaimModal
+  onOpenClaimModal,
+  onOpenHelpModal,
+  triggerConfetti
 }) {
   const [mainPage, setMainPage] = useState('campus'); // 'campus' | 'class'
   const [subTab, setSubTab] = useState('daily'); // 'daily' | 'season'
@@ -30,6 +33,15 @@ export default function TVPresentationView({
   const [cohortFilter, setCohortFilter] = useState('Toàn Sever'); // 'Khóa 3' | 'Khóa 4' | 'Toàn Sever'
 
   const listContainerRef = useRef(null);
+  const prevPointsLengthRef = useRef(pointsRecords.length);
+
+  // Auto Confetti Trigger
+  useEffect(() => {
+    if (pointsRecords.length > prevPointsLengthRef.current) {
+      if (triggerConfetti) triggerConfetti();
+    }
+    prevPointsLengthRef.current = pointsRecords.length;
+  }, [pointsRecords.length, triggerConfetti]);
 
   // Auto-scroll logic for Class List Rank 4+
   useEffect(() => {
@@ -135,11 +147,27 @@ export default function TVPresentationView({
       }
     });
 
-    // Calculate season overall points
+    // Calculate season overall points and track rank-ups
+    const recordRankUpMap = {};
+    const runningTotals = {};
+
     pointsRecords.forEach(p => {
       if (pointCategoryFilter !== 'ALL' && p.type !== pointCategoryFilter) return;
       if (studentScoresMap[p.student_id]) {
-        studentScoresMap[p.student_id].seasonPoints += Number(p.points || 0);
+        const prevTotal = runningTotals[p.student_id] || 0;
+        const newTotal = prevTotal + Number(p.points || 0);
+        
+        runningTotals[p.student_id] = newTotal;
+        studentScoresMap[p.student_id].seasonPoints = newTotal;
+        
+        const prevRank = getMilitaryRank(prevTotal).title;
+        const newRank = getMilitaryRank(newTotal).title;
+        
+        if (prevTotal === 0 && newTotal > 0) {
+          recordRankUpMap[p.id] = 'WELCOME';
+        } else if (prevRank !== newRank) {
+          recordRankUpMap[p.id] = newRank;
+        }
       }
     });
 
@@ -152,7 +180,7 @@ export default function TVPresentationView({
       ranked.sort((a, b) => b.seasonPoints - a.seasonPoints || a.name.localeCompare(b.name));
     }
 
-    return { allStudentsRanked: ranked, classOptions: classOpts, sessionPoints };
+    return { allStudentsRanked: ranked, classOptions: classOpts, sessionPoints, recordRankUpMap };
   }, [students, pointsRecords, selectedSession, pointCategoryFilter, mainPage, subTab]);
 
   // Find rank of searched student across campus & class
@@ -162,13 +190,9 @@ export default function TVPresentationView({
 
   if (searchStudentQuery.trim()) {
     const q = searchStudentQuery.toLowerCase();
-    // Apply cohort filter to search scope if set
-    const searchPool = (searchCohort && searchCohort !== 'ALL')
-      ? allStudentsRanked.filter(s => s.course === searchCohort)
-      : allStudentsRanked;
-    const foundIdx = searchPool.findIndex(s => s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q));
+    const foundIdx = allStudentsRanked.findIndex(s => s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q));
     if (foundIdx !== -1) {
-      searchedStudent = searchPool[foundIdx];
+      searchedStudent = allStudentsRanked[foundIdx];
       campusRank = allStudentsRanked.findIndex(s => s.id === searchedStudent.id) + 1;
 
       const sameClassStudents = allStudentsRanked.filter(s => s.class_name === searchedStudent.class_name);
@@ -191,13 +215,6 @@ export default function TVPresentationView({
   const top3 = activeLeaderboardList[2];
   const restRanks = activeLeaderboardList.slice(3);
 
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 80,
-      origin: { y: 0.6 }
-    });
-  };
 
   const getInitials = (name) => {
     if (!name) return 'HV';
@@ -212,7 +229,8 @@ export default function TVPresentationView({
     <div className="space-y-6 text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-950 min-h-screen pb-16 font-sans antialiased transition-colors duration-300">
       
       {/* Search Result Banner */}
-      {searchedStudent && (
+      {/* Search Result Banner */}
+      {searchedStudent ? (
         <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex items-center justify-between shadow-sm animate-fadeIn">
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 rounded-xl bg-amber-500 text-white font-black flex items-center justify-center text-lg shadow-md shadow-amber-500/20">
@@ -220,7 +238,7 @@ export default function TVPresentationView({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="font-extrabold text-slate-900 dark:text-white text-base">{searchedStudent.name}</h3>
+                <h3 className="font-extrabold text-slate-900 dark:text-white text-base">{searchedStudent.name} <span className="opacity-70 font-semibold text-sm">[{searchedStudent.course || 'Khóa 3'}]</span></h3>
                 <span className="px-2 py-0.5 rounded text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 dark:text-slate-600 font-mono font-bold">
                   {searchedStudent.id}
                 </span>
@@ -238,7 +256,16 @@ export default function TVPresentationView({
             <span>Gửi Yêu Cầu Tích Điểm</span>
           </button>
         </div>
-      )}
+      ) : searchStudentQuery.trim() ? (
+        <button 
+          onClick={onOpenHelpModal}
+          className="w-full bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm animate-fadeIn text-center transition-colors group cursor-pointer"
+        >
+          <p className="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+            Chưa thấy tên? Giơ tay ✋ để gọi Lab Coach trong phòng bạn
+          </p>
+        </button>
+      ) : null}
 
       {/* Page Tabs */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
@@ -267,13 +294,13 @@ export default function TVPresentationView({
           </button>
         </div>
 
-        {/* Global Confetti action */}
+        {/* Help Request action */}
         <button
-          onClick={triggerConfetti}
-          className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-900 text-xs font-bold shadow-sm"
+          onClick={onOpenHelpModal}
+          className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs transition-colors shadow-md shadow-rose-500/20 hover:-translate-y-0.5"
         >
-          <Sparkles className="w-4 h-4 text-amber-500" />
-          <span>Ăn Mừng 🎉</span>
+          <Hand className="w-4 h-4" />
+          <span>Giơ Tay ✋</span>
         </button>
       </div>
 
@@ -388,7 +415,7 @@ export default function TVPresentationView({
                     </div>
 
                     <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate max-w-full">
-                      {top2.name}
+                      {top2.name} <span className="opacity-70 font-semibold text-xs">[{top2.course || 'Khóa 3'}]</span>
                     </h3>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">
                       <span className="inline-block px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 font-black border border-indigo-200 dark:border-indigo-800 mr-1">{top2.course || 'Khóa 3'}</span>
@@ -425,7 +452,7 @@ export default function TVPresentationView({
                     </div>
 
                     <h3 className="font-black text-base text-slate-900 dark:text-white truncate max-w-full">
-                      {top1.name}
+                      {top1.name} <span className="opacity-70 font-semibold text-sm">[{top1.course || 'Khóa 3'}]</span>
                     </h3>
                     <p className="text-[10px] text-amber-900 dark:text-amber-100 font-extrabold mt-0.5">
                       <span className="inline-block px-1.5 py-0.2 rounded bg-amber-200 dark:bg-amber-900/60 text-amber-900 dark:text-amber-100 font-black border border-amber-300 dark:border-amber-700 mr-1">{top1.course || 'Khóa 3'}</span>
@@ -461,7 +488,7 @@ export default function TVPresentationView({
                     </div>
 
                     <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate max-w-full">
-                      {top3.name}
+                      {top3.name} <span className="opacity-70 font-semibold text-xs">[{top3.course || 'Khóa 3'}]</span>
                     </h3>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">
                       <span className="inline-block px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 font-black border border-indigo-200 dark:border-indigo-800 mr-1">{top3.course || 'Khóa 3'}</span>
@@ -553,7 +580,7 @@ export default function TVPresentationView({
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <h4 className="font-extrabold text-slate-900 dark:text-white text-base group-hover:text-indigo-600 dark:text-indigo-400 transition-colors">
-                            {student.name}
+                            {student.name} <span className="opacity-70 font-semibold text-sm">[{student.course || 'Khóa 3'}]</span>
                           </h4>
                           
                           {/* Streaks */}
@@ -621,6 +648,7 @@ export default function TVPresentationView({
               </span>
             </div>
 
+
             <div className="space-y-3 flex-1 overflow-y-auto max-h-[640px] pr-1">
               <AnimatePresence initial={false}>
                 {sessionPoints.length === 0 ? (
@@ -634,6 +662,13 @@ export default function TVPresentationView({
                     const courseVal = rec.course || student?.course || 'Khóa 3';
                     const classVal = rec.class_name || student?.class_name || 'Phòng';
                     const isTeam = rec.type === 'TEAM' || rec.category_label?.includes('Nhóm');
+                    const coachName = rec.coach_email ? (coachesList.find(c => c.email === rec.coach_email)?.name || rec.coach_email.split('@')[0]) : 'Hệ Thống';
+                    const rankUp = recordRankUpMap[rec.id];
+
+                    // Determinstic random message based on rec.id
+                    const welcomeMessages = ["Chào mừng Tân Binh gia nhập hệ thống! 🚀", "Một khởi đầu bùng nổ! 🔥", "Tân binh mới đã xuất hiện! ⭐"];
+                    const rankUpMessages = ["Tuyệt vời!", "Quá đỉnh!", "Không thể cản bước!", "Thật xuất sắc!"];
+                    const msgIndex = rec.id ? rec.id.charCodeAt(rec.id.length - 1) : 0;
 
                     return (
                       <motion.div
@@ -643,10 +678,9 @@ export default function TVPresentationView({
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.3 }}
                         className={`p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group animate-fadeIn border-l-4 ${
-                          isTeam ? 'border-l-purple-600 bg-purple-50 dark:bg-purple-900/20/20' : 'border-l-emerald-500'
+                          isTeam ? 'border-l-purple-600 bg-purple-50 dark:bg-purple-900/20' : 'border-l-emerald-500'
                         }`}
                       >
-                        {/* Top Header Row */}
                         <div className="flex items-center justify-between mb-1">
                           {isTeam ? (
                             <span className="font-black text-purple-900 dark:text-purple-200 text-xs truncate max-w-[150px] flex items-center" title={rec.team_code}>
@@ -668,9 +702,8 @@ export default function TVPresentationView({
                           </span>
                         </div>
 
-                        {/* Student Name (shown under Team Name for Group Points) */}
                         {isTeam && (
-                          <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300 dark:text-slate-600 mt-1 truncate flex items-center space-x-1">
+                          <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300 mt-1 truncate flex items-center space-x-1">
                             <span className="text-slate-400 dark:text-slate-500 font-bold">HV:</span>
                             <span className="text-slate-900 dark:text-white font-black uppercase">{normalizeName(rec.student_name)}</span>
                           </div>
@@ -680,24 +713,29 @@ export default function TVPresentationView({
                           {rec.reason}
                         </p>
 
-                        {/* Subline Row (Course & Room/Class) */}
-                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[9px] font-bold">
-                          <span className={`px-1.5 py-0.5 rounded ${
-                            isTeam 
-                              ? 'bg-purple-100 dark:bg-purple-900/40/70 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800' 
-                              : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
-                          }`}>
-                            {courseVal} • Lớp {classVal}
-                          </span>
-                          <span className="text-slate-500 dark:text-slate-400 font-mono">
-                            {rec.timestamp.split(' ')[1] || 'Vừa xong'}
-                          </span>
-                        </div>
+                        {/* Rank Up / Welcome Banner */}
+                        {rankUp === 'WELCOME' && (
+                          <div className="mt-2 px-2 py-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-[10px] font-black text-amber-700 dark:text-amber-400 flex items-center space-x-1 animate-pulse">
+                            <Sparkles className="w-3 h-3" />
+                            <span>{welcomeMessages[msgIndex % welcomeMessages.length]}</span>
+                          </div>
+                        )}
+                        {rankUp && rankUp !== 'WELCOME' && (
+                          <div className="mt-2 px-2 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg text-[10px] font-black text-indigo-700 dark:text-indigo-400 flex items-center space-x-1 animate-pulse">
+                            <Crown className="w-3 h-3" />
+                            <span>Thăng hạng {rankUp}! {rankUpMessages[msgIndex % rankUpMessages.length]}</span>
+                          </div>
+                        )}
 
-                        {/* Coach Info Row */}
-                        <div className="bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded text-[9px] text-slate-600 dark:text-slate-400 font-bold mt-2 truncate flex items-center space-x-1 border border-slate-200 dark:border-slate-700">
-                          <User className="w-2.5 h-2.5 text-slate-500 dark:text-slate-400" />
-                          <span><strong className="text-slate-900 dark:text-white font-black">COACH {rec.coach_name || 'Lab Coach'}</strong> ({rec.coach_room || 'Phòng'})</span>
+                        {/* Subline Row (Coach & Timestamp) */}
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center space-x-1 truncate max-w-[140px]">
+                            <User className="w-3 h-3 text-emerald-500" />
+                            <span className="truncate">Bởi Coach {coachName}</span>
+                          </span>
+                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
+                            {rec.timestamp}
+                          </span>
                         </div>
                       </motion.div>
                     );
@@ -720,12 +758,15 @@ export default function TVPresentationView({
           {sessionPoints.length > 0 ? (
             <div className="absolute whitespace-nowrap animate-marquee flex items-center h-full text-xs font-bold space-x-16">
               <span className="text-emerald-400 flex items-center">🟢 ĐÃ CẬP NHẬT {sessionPoints.length} LƯỢT ĐIỂM REALTIME</span>
-              {sessionPoints.slice().reverse().slice(0, 5).map(p => (
-                <span key={p.id} className="text-slate-200">
-                  <span className="text-slate-400 dark:text-slate-500 font-mono">[{p.timestamp.split(' ')[1] || 'Vừa xong'}]</span>{' '}
-                  <strong className="text-amber-400 uppercase">{normalizeName(p.student_name)}</strong> vừa nhận <strong className="text-indigo-300">+{p.points}đ</strong> từ <strong className="text-emerald-400">COACH {p.coach_name || 'Lab Coach'}</strong> ({p.coach_room || 'Phòng'}): "{p.reason}"
-                </span>
-              ))}
+              {sessionPoints.slice().reverse().slice(0, 5).map(p => {
+                const cName = p.coach_email ? (coachesList.find(c => c.email === p.coach_email)?.name || p.coach_email.split('@')[0]) : 'Hệ Thống';
+                return (
+                  <span key={p.id} className="text-slate-200">
+                    <span className="text-slate-400 dark:text-slate-500 font-mono">[{p.timestamp.split(' ')[1] || 'Vừa xong'}]</span>{' '}
+                    <strong className="text-amber-400 uppercase">{normalizeName(p.student_name)}</strong> vừa nhận <strong className="text-indigo-300">+{p.points}đ</strong> từ <strong className="text-emerald-400">COACH {cName}</strong> ({p.coach_room || 'Phòng'}): "{p.reason}"
+                  </span>
+                );
+              })}
               {normalizedStudents.filter(s => s.isNew).slice(0,3).map(s => (
                 <span key={`new-${s.id}`} className="text-rose-400 uppercase">
                   🎉 Chào mừng {s.name} (Tân binh) vừa gia nhập Bảng xếp hạng!

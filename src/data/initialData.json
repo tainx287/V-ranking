@@ -1466,7 +1466,7 @@
     },
     {
       "id": "2A202601476",
-      "name": "Nguyễn Thành Đạt: Nguyễn Lê Quân",
+      "name": "Nguyễn Lê Quân",
       "course": "Khóa 3",
       "team_code": "N/A",
       "project_name": "Chưa có dự án",
@@ -3062,7 +3062,7 @@
     },
     {
       "id": "2A202601255",
-      "name": "Trọng Tiển: Đàm Vinh Quang",
+      "name": "Đàm Vinh Quang",
       "course": "Khóa 3",
       "team_code": "N/A",
       "project_name": "Chưa có dự án",
@@ -9057,7 +9057,7 @@
       "timestamp": "2026-07-27 21:45:05",
       "coach_email": "tainguyenxuan287@gmail.com",
       "student_id": "2A202601476",
-      "student_name": "Nguyễn Thành Đạt: Nguyễn Lê Quân",
+      "student_name": "Nguyễn Lê Quân",
       "team_code": "N/A",
       "points": 1,
       "type": "INDIVIDUAL",
@@ -9075,7 +9075,7 @@
       "timestamp": "2026-07-27 21:45:05",
       "coach_email": "tainguyenxuan287@gmail.com",
       "student_id": "2A202601255",
-      "student_name": "Trọng Tiển: Đàm Vinh Quang",
+      "student_name": "Đàm Vinh Quang",
       "team_code": "N/A",
       "points": 1,
       "type": "INDIVIDUAL",
@@ -11591,35 +11591,186 @@
   ],
   "sessions": [
     {
-      "id": "K3-DAY01-LEC-D301",
-      "name": "Buổi 1: Tổng quan & Nhập môn (D301)",
-      "class_name": "D301",
-      "date": "2026-07-23"
-    },
-    {
-      "id": "K3-DAY01-LEC-C401",
-      "name": "Buổi 1: Tổng quan & Nhập môn (C401)",
-      "class_name": "C401",
-      "date": "2026-07-23"
-    },
-    {
-      "id": "K3-DAY02-LEC-D301",
-      "name": "Buổi 2: Kỹ thuật Prompting (D301)",
-      "class_name": "D301",
-      "date": "2026-07-25"
-    },
-    {
-      "id": "K3-DAY02-LEC-C401",
-      "name": "Buổi 2: Kỹ thuật Prompting (C401)",
-      "class_name": "C401",
-      "date": "2026-07-25"
-    },
-    {
-      "id": "K3-DAY03-LIVE-NOW",
-      "name": "Buổi 3: [Đang Diễn Ra] Live Pitching & Demo (Toàn Trường)",
+      "id": "K4-DAY11-LIVE-NOW",
+      "name": "🔴 Sáng 09:00 [K4] Day 11: Guardrails & AI Safety",
       "class_name": "ALL",
-      "date": "2026-08-05",
+      "date": "2026-08-07",
       "is_live": true
+    },
+    {
+      "id": "K3-DAY12-LIVE-NOW",
+      "name": "🔴 Chiều 14:00 [K3] Day 12: Deployment - Đưa Agent lên Cloud",
+      "class_name": "ALL",
+      "date": "2026-08-07",
+      "is_live": true
+    },
+    {
+      "id": "K4-DAY01",
+      "name": "[K4] Day 01: AI LLM Foundation",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY01",
+      "name": "[K3] Day 01: AI LLM Foundation",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY02",
+      "name": "[K4] Day 02: Xác định bài toán cho AI",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY02",
+      "name": "[K3] Day 02: Xác định bài toán cho AI",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY03",
+      "name": "[K4] Day 03: Design pattern to ReAct Agent",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY03",
+      "name": "[K3] Day 03: Design pattern to ReAct Agent",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY04",
+      "name": "[K4] Day 04: Prompt engineering & Tool calling",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY04",
+      "name": "[K3] Day 04: Prompt engineering & Tool calling",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY05",
+      "name": "[K4] Day 05: AI Product Thinking Requirements PRD cho AI Risk Assessment",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY05",
+      "name": "[K3] Day 05: AI Product Thinking Requirements PRD cho AI Risk Assessment",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY06",
+      "name": "[K4] Day 06: AI Product Prototype Demo Hackathon",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY06",
+      "name": "[K3] Day 06: AI Product Prototype Demo Hackathon",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY07",
+      "name": "[K4] Day 07: Data Foundations Embedding Chunking Vector Store ChromaDB FAISS",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY07",
+      "name": "[K3] Day 07: Data Foundations Embedding Chunking Vector Store ChromaDB FAISS",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY08",
+      "name": "[K4] Day 08: RAG Pipeline Truy Xuất Sinh Câu Trả Lời Hybrid search Re-ranking RAG evaluation",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY08",
+      "name": "[K3] Day 08: RAG Pipeline Truy Xuất Sinh Câu Trả Lời Hybrid search Re-ranking RAG evaluation",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY09",
+      "name": "[K4] Day 09: Multi-agent MCP A2A",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY09",
+      "name": "[K3] Day 09: Multi-agent MCP A2A",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY10",
+      "name": "[K4] Day 10: Data pipeline observability E402",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY10",
+      "name": "[K3] Day 10: Data pipeline observability E402",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY11",
+      "name": "[K3] Day 11: Guardrails & AI Safety",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY12",
+      "name": "[K4] Day 12: Deployment - Đưa Agent lên Cloud",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY13",
+      "name": "[K4] Day 13: Monitoring Logging Observability",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY13",
+      "name": "[K3] Day 13: Monitoring Logging Observability",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY14",
+      "name": "[K4] Day 14: AI Evaluation Benchmarking",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY14",
+      "name": "[K3] Day 14: AI Evaluation Benchmarking",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K4-DAY15",
+      "name": "[K4] Day 15: Retrospective",
+      "class_name": "ALL",
+      "date": "2026-08-07"
+    },
+    {
+      "id": "K3-DAY15",
+      "name": "[K3] Day 15: Retrospective",
+      "class_name": "ALL",
+      "date": "2026-08-07"
     }
   ]
 }
