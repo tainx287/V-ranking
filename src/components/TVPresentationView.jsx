@@ -372,21 +372,41 @@ export default function TVPresentationView({
 
           {/* Class Filter (only for Class page) */}
           {mainPage === 'class' && (
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto max-w-[200px] sm:max-w-xs md:max-w-none">
-              {classOptions.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setClassFilter(c)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                    classFilter === c
-                      ? 'bg-white dark:bg-slate-800 text-slate-905 shadow-sm border border-slate-200 dark:border-slate-700'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white'
-                  }`}
+            <>
+              {/* Select Dropdown on Mobile */}
+              <div className="flex sm:hidden items-center bg-slate-100 dark:bg-slate-800/80 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 w-full">
+                <span className="text-xs font-bold text-slate-500 mr-2 whitespace-nowrap">Lớp:</span>
+                <select
+                  value={classFilter}
+                  onChange={(e) => setClassFilter(e.target.value)}
+                  className="bg-transparent text-slate-800 dark:text-slate-100 font-extrabold text-xs w-full focus:outline-none cursor-pointer"
                 >
-                  {c === 'ALL' ? 'Tất cả lớp' : c}
-                </button>
-              ))}
-            </div>
+                  {classOptions.map((c) => (
+                    <option key={c} value={c} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                      {c === 'ALL' ? 'Tất cả các lớp' : `Lớp ${c}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Scrollable button pills for larger screens */}
+              <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto max-w-xs md:max-w-none">
+                {classOptions.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setClassFilter(c)}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      classFilter === c
+                        ? 'bg-white dark:bg-slate-800 text-slate-905 shadow-sm border border-slate-200 dark:border-slate-700'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white'
+                    }`}
+                  >
+                    {c === 'ALL' ? 'Tất cả lớp' : c}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>

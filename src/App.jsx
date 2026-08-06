@@ -75,7 +75,73 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [sessions, setSessions] = useState(initialData.sessions);
+  const [sessions, setSessions] = useState(() => {
+    const rawSessions = initialData.sessions;
+    const refDate = '2026-08-07';
+    
+    function getBusinessDate(refDateStr, offsetDays) {
+      let date = new Date(refDateStr);
+      let count = 0;
+      let direction = offsetDays >= 0 ? 1 : -1;
+      let target = Math.abs(offsetDays);
+      
+      while (count < target) {
+        date.setDate(date.getDate() + direction);
+        let day = date.getDay();
+        if (day !== 0 && day !== 6) {
+          count++;
+        }
+      }
+      return date.toISOString().split('T')[0];
+    }
+    
+    return rawSessions.map(s => {
+      // If it is already a special live session
+      if (s.id === 'K4-DAY11-LIVE-NOW') {
+        return {
+          ...s,
+          date: '2026-08-07',
+          name: '🔴 Sáng 09:00 [K4] Day 11: Guardrails & AI Safety'
+        };
+      }
+      if (s.id === 'K3-DAY12-LIVE-NOW') {
+        return {
+          ...s,
+          date: '2026-08-07',
+          name: '🔴 Chiều 14:00 [K3] Day 12: Deployment - Đưa Agent lên Cloud'
+        };
+      }
+      
+      // Parse K4-DAY01 -> cohort = K4, day = 1
+      const match = s.id.match(/^(K3|K4)-DAY(\d+)$/);
+      if (match) {
+        const cohort = match[1];
+        const dayNum = parseInt(match[2], 10);
+        
+        let calculatedDate;
+        let timeStr = cohort === 'K4' ? 'Sáng 09:00' : 'Chiều 14:00';
+        if (cohort === 'K4') {
+          calculatedDate = getBusinessDate(refDate, dayNum - 11);
+        } else {
+          calculatedDate = getBusinessDate(refDate, dayNum - 12);
+        }
+        
+        // Clean name
+        let cleanName = s.name.replace(/\[K(3|4)\]/, '').trim();
+        cleanName = cleanName.replace(/^Day \d+:\s*/, '');
+        
+        const dayStr = dayNum < 10 ? `0${dayNum}` : `${dayNum}`;
+        const newName = `${calculatedDate === '2026-08-07' ? '🔴 ' : ''}${timeStr} [${cohort}] Day ${dayStr}: ${cleanName} (${calculatedDate})`;
+        
+        return {
+          ...s,
+          date: calculatedDate,
+          name: newName
+        };
+      }
+      return s;
+    });
+  });
 
   // Sync to localStorage
   useEffect(() => {
