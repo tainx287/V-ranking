@@ -398,11 +398,11 @@ export default function TVPresentationView({
         <div className="lg:col-span-3 space-y-6">
           
           {/* HERO PODIUM SECTION (Top 1-2-3 as 3D Elevated Cards) */}
-          <div className="grid grid-cols-3 gap-4 items-end pt-8 pb-4 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-end pt-8 pb-4 max-w-3xl mx-auto">
             
             {/* Rank 2 (Left) */}
             {top2 ? (
-              <div className="flex flex-col items-center order-1 animate-fadeIn relative group">
+              <div className="flex flex-col items-center order-2 md:order-1 animate-fadeIn relative group">
                 <div className="w-full bg-white dark:bg-slate-800 p-5 rounded-2xl text-center border border-slate-200 dark:border-slate-700 flex flex-col justify-between min-h-[160px] relative shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 dark:text-slate-600 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-slate-300 flex items-center shadow-sm">
                     <Medal className="w-3.5 h-3.5 mr-1 text-slate-400 dark:text-slate-500" /> #2
@@ -438,7 +438,7 @@ export default function TVPresentationView({
 
             {/* Rank 1 (Middle) - Elevated, Gold Crown */}
             {top1 ? (
-              <div className="flex flex-col items-center order-2 -mt-4 animate-fadeIn relative group z-10">
+              <div className="flex flex-col items-center order-1 md:order-2 md:-mt-4 animate-fadeIn relative group z-10">
                 <div className="w-full bg-amber-50/50 dark:bg-amber-900/20 p-6 rounded-2xl text-center border-2 border-amber-400 dark:border-amber-500/50 flex flex-col justify-between min-h-[200px] relative shadow-2xl hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all duration-300 hover:-translate-y-2">
                   <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-black px-3.5 py-1 rounded-full flex items-center shadow-lg border border-amber-400 dark:border-amber-500/50">
                     <Crown className="w-4 h-4 mr-1" /> TOP 1
