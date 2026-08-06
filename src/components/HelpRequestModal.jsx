@@ -232,7 +232,11 @@ export default function HelpRequestModal({ isOpen, onClose, onSubmit, students, 
                     key={note.id}
                     type="button"
                     onClick={() => setSelectedNoteType(note.id)}
-                    className={px-3 py-1.5 rounded-lg text-xs font-bold transition-all border \}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                      selectedNoteType === note.id
+                        ? 'bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-900/30 dark:border-rose-500/30 dark:text-rose-400'
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-rose-200 hover:text-rose-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:border-rose-500/50'
+                    }`}
                   >
                     {note.label}
                   </button>
@@ -262,7 +266,11 @@ export default function HelpRequestModal({ isOpen, onClose, onSubmit, students, 
             type="submit"
             form="help-request-form"
             disabled={!selectedRoom || !locationText || !selectedNoteType || isSubmitting}
-            className={w-full flex items-center justify-center space-x-2 py-3.5 rounded-xl font-black text-sm transition-all shadow-lg \}
+            className={`w-full flex items-center justify-center space-x-2 py-3.5 rounded-xl font-black text-sm transition-all shadow-lg ${
+              !selectedRoom || !locationText || !selectedNoteType || isSubmitting
+                ? 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white hover:-translate-y-0.5 shadow-rose-500/25'
+            }`}
           >
             {isSubmitting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
