@@ -370,7 +370,7 @@ def main():
 
     output_data = {
         "students": students_list,
-        "points_records": points_records,
+        "pointsRecords": points_records,
         "sessions": sessions_list
     }
 

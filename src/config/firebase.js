@@ -16,7 +16,7 @@ const firebaseConfig = {
   messagingSenderId: "410246375536",
   appId: "1:410246375536:web:990a0f64bdcb6c6aeeecb5",
   measurementId: "G-QFRMVN1GCJ",
-  databaseURL: "https://vinranking-8d26f.firebaseio.com"
+  databaseURL: "https://vinranking-8d26f-default-rtdb.firebaseio.com/"
 };
 
 let app, database;

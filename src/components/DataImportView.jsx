@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileSpreadsheet, Download, CheckCircle, RefreshCw, Database, Search, AlertCircle, Link } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { parseGoogleSheetsData } from '../utils/googleSheetsParser';
 
 export default function DataImportView({
   pointsRecords,
@@ -69,24 +70,13 @@ export default function DataImportView({
       const worksheet = wb.Sheets[wb.SheetNames[0]];
       const rawData = XLSX.utils.sheet_to_json(worksheet);
 
-      const newParsedRecords = rawData.map((row, idx) => ({
-        id: `PTS-GSHEET-${idx + 1}`,
-        session_id: row['Session ID'] || row['Mã buổi học / Session ID'] || 'K3-DAY01-LEC-D301',
-        class_name: 'C401',
-        timestamp: row['Thời gian gửi'] || new Date().toISOString(),
-        coach_email: row['Email'] || row['Email Address'] || 'coach@labflow.edu.vn',
-        student_id: row['Mã số học viên'] || '',
-        student_name: row['Tên học viên'] || row['Dòng gốc'] || 'Học viên',
-        points: parseFloat(row['Điểm cộng']) || 1.0,
-        reason: row['Lý do'] || 'Phát biểu',
-        raw_line: row['Dòng gốc'] || ''
-      }));
+      const newParsedRecords = parseGoogleSheetsData(rawData);
 
       onImportNewPoints(newParsedRecords);
       setImportStatus(`Đồng bộ thành công ${newParsedRecords.length} dòng điểm cộng từ Google Sheet live DB!`);
     } catch (err) {
       console.error(err);
-      setImportStatus(`Thông báo: Đã kết nối link Google Sheet. Nếu Sheet chưa bật Publish to Web, bạn có thể chọn Upload File Excel để đồng bộ offline.`);
+      setImportStatus(`Lỗi khi đồng bộ Google Sheets: ${err.message}`);
     } finally {
       setIsSyncing(false);
     }
