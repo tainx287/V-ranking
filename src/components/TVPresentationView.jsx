@@ -104,7 +104,7 @@ export default function TVPresentationView({
   };
 
   // Wrap heavy ranking calculations in useMemo
-  const { allStudentsRanked, classOptions, sessionPoints } = useMemo(() => {
+  const { allStudentsRanked, classOptions, sessionPoints, recordRankUpMap } = useMemo(() => {
     // Clean data pipeline: Deduplicate and Normalize names
     const uniqueStudentsMap = new Map();
     students.forEach(s => {
@@ -787,7 +787,7 @@ export default function TVPresentationView({
                   </span>
                 );
               })}
-              {normalizedStudents.filter(s => s.isNew).slice(0,3).map(s => (
+              {allStudentsRanked.filter(s => s.isNew).slice(0,3).map(s => (
                 <span key={`new-${s.id}`} className="text-rose-400 uppercase">
                   🎉 Chào mừng {s.name} (Tân binh) vừa gia nhập Bảng xếp hạng!
                 </span>

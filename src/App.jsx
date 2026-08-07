@@ -10,6 +10,8 @@ import AuthModal from './components/CoachAuthModal';
 import initialData from './data/initialData.json';
 import { playCoinSound, playFanfareSound } from './utils/audio';
 import confetti from 'canvas-confetti';
+import { database } from './config/firebase';
+import { ref, onValue, set } from 'firebase/database';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tv'); // 'tv' | 'coach' | 'data'
@@ -143,7 +145,18 @@ export default function App() {
     });
   });
 
-  // Sync to localStorage
+  // Helper đồng bộ cả Firebase và LocalStorage
+  const updateFirebaseAndLocal = (dbKey, stateSetter, updateFn) => {
+    stateSetter(prev => {
+      const nextState = updateFn(prev);
+      if (database) {
+        set(ref(database, dbKey), nextState).catch(err => console.error("Firebase write error:", err));
+      }
+      return nextState;
+    });
+  };
+
+  // Sync to localStorage as fallback
   useEffect(() => {
     localStorage.setItem('labscore_students', JSON.stringify(students));
   }, [students]);
@@ -176,26 +189,63 @@ export default function App() {
     }
   }, [theme]);
 
+  // Lắng nghe Firebase Realtime Database
+  useEffect(() => {
+    if (!database) return;
+
+    const unsubStudents = onValue(ref(database, 'students'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) setStudents(data);
+      else set(ref(database, 'students'), students); // Seed initial data
+    });
+
+    const unsubPoints = onValue(ref(database, 'pointsRecords'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) setPointsRecords(data);
+      else set(ref(database, 'pointsRecords'), pointsRecords); // Seed initial data
+    });
+
+    const unsubClaims = onValue(ref(database, 'claimRequests'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) setClaimRequests(data);
+      else set(ref(database, 'claimRequests'), claimRequests); // Seed initial data
+    });
+
+    const unsubHelp = onValue(ref(database, 'helpRequests'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) setHelpRequests(data);
+      else set(ref(database, 'helpRequests'), helpRequests); // Seed initial data
+    });
+
+    return () => {
+      unsubStudents();
+      unsubPoints();
+      unsubClaims();
+      unsubHelp();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
   // Handlers
   const handleAddPointRecord = (newRecord) => {
-    setPointsRecords(prev => [...prev, newRecord]);
+    updateFirebaseAndLocal('pointsRecords', setPointsRecords, prev => [...prev, newRecord]);
   };
 
   const handleUndoPointRecord = (recordId) => {
-    setPointsRecords(prev => prev.filter(r => r.id !== recordId));
+    updateFirebaseAndLocal('pointsRecords', setPointsRecords, prev => prev.filter(r => r.id !== recordId));
   };
 
   const handleImportNewPoints = (newRecords) => {
-    setPointsRecords(prev => [...newRecords, ...prev]);
+    updateFirebaseAndLocal('pointsRecords', setPointsRecords, prev => [...newRecords, ...prev]);
   };
 
   const handleAddStudent = (newStudent) => {
-    setStudents(prev => [...prev, newStudent]);
+    updateFirebaseAndLocal('students', setStudents, prev => [...prev, newStudent]);
   };
 
   // Student Self-Claim request handler
   const handleSendClaimRequest = (newClaim) => {
-    setClaimRequests(prev => [newClaim, ...prev]);
+    updateFirebaseAndLocal('claimRequests', setClaimRequests, prev => [newClaim, ...prev]);
   };
 
   // Coach approves claim
@@ -215,8 +265,8 @@ export default function App() {
       raw_line: `${claim.student_name} - ${claim.points} - ${claim.student_id} - ${claim.reason}`
     };
 
-    setPointsRecords(prev => [...prev, newRecord]);
-    setClaimRequests(prev => prev.map(c => c.id === claim.id ? { ...c, status: 'approved' } : c));
+    updateFirebaseAndLocal('pointsRecords', setPointsRecords, prev => [...prev, newRecord]);
+    updateFirebaseAndLocal('claimRequests', setClaimRequests, prev => prev.map(c => c.id === claim.id ? { ...c, status: 'approved' } : c));
 
     if (soundEnabled) {
       if (claim.points >= 3) playFanfareSound();
@@ -227,19 +277,19 @@ export default function App() {
   };
 
   const handleRejectClaimRequest = (claimId) => {
-    setClaimRequests(prev => prev.filter(c => c.id !== claimId));
+    updateFirebaseAndLocal('claimRequests', setClaimRequests, prev => prev.filter(c => c.id !== claimId));
   };
 
   const handleClearAllPendingClaims = () => {
-    setClaimRequests(prev => prev.filter(c => c.session_id !== selectedSession || c.status !== 'pending'));
+    updateFirebaseAndLocal('claimRequests', setClaimRequests, prev => prev.filter(c => c.session_id !== selectedSession || c.status !== 'pending'));
   };
 
   const handleAddHelpRequest = (req) => {
-    setHelpRequests(prev => [{ ...req, id: Date.now(), timestamp: new Date().toISOString(), status: 'pending' }, ...prev]);
+    updateFirebaseAndLocal('helpRequests', setHelpRequests, prev => [{ ...req, id: Date.now(), timestamp: new Date().toISOString(), status: 'pending' }, ...prev]);
   };
 
   const handleResolveHelpRequest = (id) => {
-    setHelpRequests(prev => prev.filter(r => r.id !== id));
+    updateFirebaseAndLocal('helpRequests', setHelpRequests, prev => prev.filter(r => r.id !== id));
   };
 
   const handleLoginCoach = (coachObj) => {
